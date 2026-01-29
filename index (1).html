@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Drink Master – Treino Manual CB</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0f2027;
+            color: #fff
+        }
+
+        header {
+            padding: 16px;
+            text-align: center;
+            background: #1c3b4a
+        }
+
+        main {
+            padding: 16px;
+            max-width: 600px;
+            margin: auto
+        }
+
+        #drinkName {
+            font-size: 24px;
+            margin-bottom: 10px;
+            text-align: center;
+            color: #ffab00;
+            font-weight: bold
+        }
+
+        #score {
+            font-size: 18px;
+            text-align: center;
+            margin-bottom: 10px
+        }
+
+        .ingredients,
+        .glass {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px
+        }
+
+        .ingredient {
+            background: #fff;
+            color: #000;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s
+        }
+
+        .ingredient:active {
+            transform: scale(0.9)
+        }
+
+        .glass {
+            min-height: 100px;
+            border: 2px dashed #fff;
+            border-radius: 12px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05)
+        }
+
+        .glass-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 10px;
+            border-radius: 12px;
+            font-size: 13px
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold
+        }
+
+        .check {
+            background: #4caf50;
+            color: #fff
+        }
+
+        .next {
+            background: #2196f3;
+            color: #fff
+        }
+
+        .reset {
+            background: #f44336;
+            color: #fff
+        }
+
+        #result {
+            text-align: left;
+            margin-top: 15px;
+            font-size: 16px;
+            line-height: 1.5;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 8px
+        }
+
+        .missing {
+            color: #ffeb3b
+        }
+
+        .wrong {
+            color: #ff5252
+        }
+
+        .success {
+            color: #4caf50;
+            text-align: center;
+            display: block
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>🍸 Drink Master</h1>
+        <p>Treino Baseado no Manual V.9</p>
+    </header>
+    <main>
+        <div id="score">Pontos: 0</div>
+        <div id="drinkName"></div>
+        <div class="ingredients" id="ingredients"></div>
+        <h3>Na Taça / Copo</h3>
+        <div class="glass" id="glass"></div>
+        <button class="check" onclick="checkDrink()">Conferir Receita</button>
+        <button class="reset" onclick="resetGlass()">Refazer</button>
+        <button class="next" onclick="nextDrink()">Próximo Drink</button>
+        <div id="result"></div>
+    </main>
+
+    <script>
+        // === BANCO DE DADOS ATUALIZADO PELO MANUAL V.9 ===
+        const drinks = [
+            { name: 'Acerola Martini', recipe: ['50ml Vodka Ketel One', '50ml Polpa Acerola', '25ml Sumo Maracujá', '20ml Licor Chambord/Massenez', '15ml Suco Limão Siciliano', '50ml Syrup', '01 Fatia Laranja Caramelizada Seca', 'Gelo'] },
+            { name: 'Alexander', recipe: ['40ml Conhaque ', '35ml Creme de Cacau', '30ml Creme de Leite', '10ml Leite Condensado', 'Gelo'] },
+            { name: 'Apple Gin Sem Álcool', recipe: ['50ml de Xarope Maça Verde', '200ml Água Tônica', '01 Lque de Maça Verde', 'Gelo'] },
+            { name: 'Apple Martini', recipe: ['50ml Vodka', '20ml Xarope Maçã Verde', '01 Rodela Maçã Verde', 'Gotas de Limão-Taiti', 'Gelo'] },
+            { name: 'Axé', recipe: ['50ml Vdka Absolut Natural', '03 Colheres de Sopa de Polpa Maracujá com Sementes', 'Meia Pimenta Dedo de Moça sem semente Cortada em Tiras', '01 Colher de Sopa de Açúcar', 'Gelo'] },
+            { name: 'Aperol Mule', recipe: ['50ml Aperol', '25ml Vodka Absolut Natural', '25ml Xarope Gengibre', '20ml Sumo de Limão Siciliano'] },
+            { name: 'Aperol Spritz', recipe: ['120ml Espumante', '80ml Aperol', '50ml Soda Limonada', 'Rodela de Laranja', 'Gelo'] },
+            { name: 'Bloody Mary', recipe: ['50ml Vodka', '150ml Suco Tomate', '15ml Sumo Limão-Taiti', '03ml Molho Inglês', '04 Gotas Pimenta Tabasco', 'Pitada de Sal', 'Gelo'] },
+            { name: 'Bellini', recipe: ['25ml Purê de Pêssego', 'Completar com Espumante'] },
+            { name: 'Bossa Nova', recipe: ['50ml Vodka Absolut Vanilla', '04 Morangos', '04 Tomates Cereja', '01 Colher de Açúcar', '01 Tomate Cereja Decoração', 'Gelo'] },
+            { name: 'Blue Martini', recipe: ['50ml Vodka', '20ml Licor Curaçau Blue', '01 Limão-Taiti Macerado'] },
+            { name: 'Carajillo', recipe: ['50ml Café Ristretto', '50ml Licor 43', 'Gelo'] },
+            {},
+        ];
+
+        let index = 0, score = 0, selected = [];
+        const drinkName = document.getElementById('drinkName');
+        const ingredientsDiv = document.getElementById('ingredients');
+        const glassDiv = document.getElementById('glass');
+        const resultDiv = document.getElementById('result');
+        const scoreDiv = document.getElementById('score');
+
+        function loadDrink() {
+            selected = [];
+            glassDiv.innerHTML = '';
+            resultDiv.innerHTML = '';
+            const d = drinks[index];
+            drinkName.innerText = d.name;
+            ingredientsDiv.innerHTML = '';
+
+            // Embaralha os corretos com um errado genérico para o treino
+            let opts = [...d.recipe, 'Açúcar Cristal', 'Sake', 'Hortelã (Decoração)', 'Canudo'];
+            opts.sort(() => Math.random() - 0.5).forEach(i => {
+                let b = document.createElement('div');
+                b.className = 'ingredient';
+                b.innerText = i;
+                b.onclick = () => add(i);
+                ingredientsDiv.appendChild(b);
+            });
+        }
+
+        function add(i) {
+            if (selected.includes(i)) return;
+            selected.push(i);
+            let d = document.createElement('div');
+            d.className = 'glass-item';
+            d.innerText = i;
+            glassDiv.appendChild(d);
+        }
+
+        function checkDrink() {
+            let r = drinks[index].recipe;
+            let missing = [];
+            let wrong = [];
+
+            // Apenas o que está no PDF mas você não selecionou
+            r.forEach(i => {
+                if (!selected.includes(i)) missing.push(i);
+            });
+
+            // O que você selecionou mas NÃO está no PDF
+            selected.forEach(i => {
+                if (!r.includes(i)) wrong.push(i);
+            });
+
+            let acertos = r.length - missing.length;
+            let p = (acertos * 10) - (wrong.length * 5);
+            if (p < 0) p = 0;
+            score += p;
+            scoreDiv.innerText = 'Pontos: ' + score;
+
+            let msg = `<strong>Acertos: ${acertos}/${r.length}</strong><br>`;
+
+            if (missing.length > 0) {
+                msg += `<span class="missing">⚠️ Faltou no Drink:</span> ${missing.join(', ')}<br>`;
+            }
+            if (wrong.length > 0) {
+                msg += `<span class="wrong">❌ Não vai na receita:</span> ${wrong.join(', ')}<br>`;
+            }
+            if (missing.length === 0 && wrong.length === 0) {
+                msg = `<span class="success">⭐ PERFEITO! Receita padrão V.9 realizada com sucesso.</span>`;
+            }
+
+            resultDiv.innerHTML = msg;
+        }
+
+        function resetGlass() { selected = []; glassDiv.innerHTML = ''; resultDiv.innerHTML = '' }
+        function nextDrink() { if (index < drinks.length - 1) { index++; loadDrink() } else { resultDiv.innerText = 'Fim do treino. Pontos finais: ' + score } }
+
+        loadDrink();
+    </script>
+</body>
