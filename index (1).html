@@ -189,7 +189,7 @@
             ingredientsDiv.innerHTML = '';
 
             // Embaralha os corretos com um errado genérico para o treino
-            let opts = [...d.recipe, 'Açúcar Cristal', 'Sake', 'Hortelã (Decoração)', 'Canudo'];
+            let opts = [...d.recipe, 'Açúcar Cristal', 'Sake', 'Gin', 'Vodka', 'Hortelã (Decoração)'];
             opts.sort(() => Math.random() - 0.5).forEach(i => {
                 let b = document.createElement('div');
                 b.className = 'ingredient';
